@@ -5,6 +5,7 @@
 #include <GL4D/gl4duw_SDL2.h>
 #include <SDL_image.h>
 #include <stdio.h>
+#include "noise.h"
 
 void terre_init(void);
 //static void resize(int width, int height);
@@ -77,6 +78,7 @@ static void charge_texture(void){
 }
 void terre_init(void) {
 
+  initNoiseTextures();
   glClearColor(0.0f, 1.0f, 0.0f, 1.0f); // couleur d'effacement
 
   // création des objets
@@ -112,6 +114,7 @@ static void resize(void) {
 }
 
 
+
 static void draw_object(int object_tex_id, int sky, int sun, float object_scale ) {
 
   gl4duScalef(
@@ -128,7 +131,24 @@ static void draw_object(int object_tex_id, int sky, int sun, float object_scale 
   gl4duScalef(ancienne_taille, ancienne_taille,
               ancienne_taille);
 }
+static void draw_earth(){
+  gl4duScalef(1, 1, 1);   // le diamètre de la lune est d'environ 1/3 de celui
+  gl4duSendMatrices(); // envoie les matrices de translation et rotation
+  /* glBindTexture(GL_TEXTURE_2D, _texId_terre[object_tex_id]); */
+  glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+  glUniform1f(glGetUniformLocation(_pId, "zoom"), 7.5f);
+  useNoiseTextures(_pId[0], 0);
+  /* glUniform1f(glGetUniformLocation(_pId, "zoom"), 2.5f); */
+  /* glUniform1i(glGetUniformLocation(_pId, "sky"), sky); */
+  /* glUniform1i(glGetUniformLocation(_pId, "sun"), sun); */
+  gl4dgDraw(_sphereId); // dessine le tore
+  unuseNoiseTextures(0);
 
+  float ancienne_taille = 1 / 1;
+  gl4duScalef(ancienne_taille, ancienne_taille,
+              ancienne_taille);
+  
+}
 static void scene(GLfloat a) {
   GLfloat blanc[] = {1.0f, 1.0f, 1.0f, 1.0f};
   gl4duBindMatrix("mod"); // model, car on veut agir sur l\'objet
@@ -152,8 +172,10 @@ static void scene(GLfloat a) {
   gl4duRotatef(a, 0, 1, 0);
   gl4duScalef(0.3f, 0.3f, 0.3f);
   gl4duTranslatef(10.0f, 0, 0);
-  draw_object(0, 0, 0, 1);
-
+  gl4duRotatef(90, 0, 1, 0);
+  /* draw_object(0, 0, 0, 1); */
+  draw_earth();
+  gl4duRotatef(-90, 0, 1, 0);
   glUseProgram(_pId[3]);
   /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
   /*              blanc); // envoie couleur blanche en lumière aux shaders */
