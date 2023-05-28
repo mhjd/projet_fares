@@ -13,7 +13,7 @@ void saturne_sortie(void);
 static GLuint _wW = 640, _wH = 480;
 static GLuint _sphereId = 0;
 static GLuint _anneauId = 0;
-static GLuint _pId = 0;
+static GLuint _pId[3] = {0};
 static GLuint _texId_saturne[4] = {0};
 
 void charge_texture() {
@@ -21,12 +21,12 @@ void charge_texture() {
   // ma texture :
   // mes fichiers images de texture
   static char *images[] = {"img/2k_saturn_ring_alpha_transparence.png",
-                           "img/lune.jpg", "img/8k_stars_milky_way.jpg",
+                           "img/8k_stars_milky_way.jpg",
                            "img/8k_saturn.jpg"};
 
   SDL_Surface *t;
   glGenTextures(4, _texId_saturne);
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 3; i++) {
     glBindTexture(GL_TEXTURE_2D, _texId_saturne[i]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -45,24 +45,22 @@ void charge_texture() {
   }
 }
 void saturne_init(void) {
-
-
-
-
   glClearColor(0.0f, 1.0f, 0.0f, 1.0f); // couleur d'effacement
 
   // création des objets
   _sphereId = gl4dgGenSpheref(20, 20);
   _anneauId = gl4dgGenTorusf(60, 2, 0.1f);
   // pid shader
-  _pId = gl4duCreateProgram("<vs>shaders/saturne.vs", "<fs>shaders/saturne.fs", NULL);
+  _pId[0] = gl4duCreateProgram("<vs>shaders/terre.vs", "<fs>shaders/etoiles.fs", NULL); // ciel
+  _pId[1] = gl4duCreateProgram("<vs>shaders/terre.vs", "<fs>shaders/saturne.fs", NULL);
+  _pId[2] = gl4duCreateProgram("<vs>shaders/terre.vs", "<fs>shaders/anneau.fs", NULL);
 
   // activation du test de profondeur
   glEnable(GL_DEPTH_TEST);
 
-  gl4duGenMatrix(GL_FLOAT, "proj_ninja3");
-  gl4duGenMatrix(GL_FLOAT, "mod_ninja3");
-  gl4duGenMatrix(GL_FLOAT, "view_ninja3");
+  gl4duGenMatrix(GL_FLOAT, "proj");
+  gl4duGenMatrix(GL_FLOAT, "mod");
+  gl4duGenMatrix(GL_FLOAT, "view");
   charge_texture();
   //resize(_wW, _wH);
 }
@@ -74,13 +72,14 @@ static void resize(void) {
   _wW = data[2];
   _wH = data[3];
   ratio = _wW / ((GLfloat)_wH); // ratio d'écran
-  gl4duBindMatrix("proj_ninja3"); // active (met en current) la matrice liée au nom
+  gl4duBindMatrix("proj"); // active (met en current) la matrice liée au nom
   gl4duLoadIdentityf();
   // adaptation de l'écran au ratio
   gl4duFrustumf(-1 * ratio, 1 * ratio, -1, 1, 2, 100);
 }
 
-void draw_object(int object_tex_id, int sky, GLuint object_id,
+// supprimer le deuxième argument
+void draw_object(int object_tex_id, GLuint object_id,
                  float object_scale) {
 
   gl4duScalef( object_scale,  object_scale,
@@ -88,28 +87,29 @@ void draw_object(int object_tex_id, int sky, GLuint object_id,
 
   gl4duSendMatrices(); // envoie les matrices de translation et rotation
   glBindTexture(GL_TEXTURE_2D, _texId_saturne[object_tex_id]);
-  glUniform1i(glGetUniformLocation(_pId, "sky"), sky);
   gl4dgDraw(object_id);
   gl4duScalef(1 / object_scale, 1 / object_scale, 1 / object_scale);
 }
 
 void scene() {
   GLfloat blanc[] = {1.0f, 1.0f, 1.0f, 1.0f};
-  gl4duBindMatrix("mod_ninja3"); // model, car on veut agir sur l\'objet
+  gl4duBindMatrix("mod"); // model, car on veut agir sur l\'objet
   gl4duLoadIdentityf();   // chargement de matrice identité dans la matrice en
                           // cours càd model
-  glUseProgram(_pId); // quel programme va être utilisé ? pId -> .vs fs
+  glUseProgram(_pId[0]); // quel programme va être utilisé ? pId -> .vs fs
 
-  glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1,
-               blanc);
+  /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
+  /*              blanc); */
   // création du ciel étoilé
-  draw_object(2, 1, _sphereId, 20.0f);
+  draw_object(1, _sphereId, 20.0f);
 
+  glUseProgram(_pId[1]); // quel programme va être utilisé ? pId -> .vs fs
   // création de saturne
-  draw_object(3, 0, _sphereId, 1.0f);
+  draw_object(2, _sphereId, 1.0f);
 
+  glUseProgram(_pId[2]); // quel programme va être utilisé ? pId -> .vs fs
   // création de l'anneeau de saturne
-  draw_object(0, 0, _anneauId, 2.5f);
+  draw_object(0, _anneauId, 2.5f);
 
 
   glUseProgram(0);
@@ -137,7 +137,7 @@ void saturne_draw(void) {
       GL_DEPTH_BUFFER_BIT); // on clear le buffer de bouleur, et de profondeur
 
   glViewport(0, 0, _wW, _wH);
-  gl4duBindMatrix("view_ninja3");
+  gl4duBindMatrix("view");
   gl4duLoadIdentityf(); 
   gl4duLookAtf(x, y, z, 0, 0, 0, 0, 1.0f, 0); 
 

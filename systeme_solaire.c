@@ -14,7 +14,7 @@ void systeme_solaire_sortie(void);
 static GLuint _wW , _wH;
 static GLuint _sphereId = 0;
 static GLuint _anneauId = 0;
-static GLuint _pId = 0;
+static GLuint _pId[6] = {0};
 
 static GLuint _texId_systeme_solaire[6] = {0};
 
@@ -67,14 +67,19 @@ void systeme_solaire_init(void) {
   _anneauId = gl4dgGenTorusf(60, 2, 0.1f);
   //_anneauId = gl4dgGenTorusf(60, 2, 0.1f);
   // pid shader
-  _pId = gl4duCreateProgram("<vs>shaders/systeme_solaire.vs", "<fs>shaders/systeme_solaire.fs", NULL);
+  _pId[0] = gl4duCreateProgram("<vs>shaders/terre.vs", "<fs>shaders/etoiles.fs", NULL);
+  _pId[1] = gl4duCreateProgram("<vs>shaders/terre.vs", "<fs>shaders/lune.fs", NULL);
+  _pId[2] = gl4duCreateProgram("<vs>shaders/terre.vs", "<fs>shaders/terre.fs", NULL);
+  _pId[3] = gl4duCreateProgram("<vs>shaders/terre.vs", "<fs>shaders/saturne.fs", NULL);
+  _pId[4] = gl4duCreateProgram("<vs>shaders/terre.vs", "<fs>shaders/anneau.fs", NULL);
+  _pId[5] = gl4duCreateProgram("<vs>shaders/terre.vs", "<fs>shaders/soleil.fs", NULL);
 
   // activation du test de profondeur
   glEnable(GL_DEPTH_TEST);
 
-  gl4duGenMatrix(GL_FLOAT, "proj_ninja1");
-  gl4duGenMatrix(GL_FLOAT, "mod_ninja1");
-  gl4duGenMatrix(GL_FLOAT, "view_ninja1");
+  gl4duGenMatrix(GL_FLOAT, "proj");
+  gl4duGenMatrix(GL_FLOAT, "mod");
+  gl4duGenMatrix(GL_FLOAT, "view");
 
   charge_texture();
   //resize(_wW, _wH);
@@ -87,13 +92,14 @@ static void resize(void) {
   _wW = data[2];
   _wH = data[3];
   ratio = _wW / ((GLfloat)_wH); // ratio d'écran
-  gl4duBindMatrix("proj_ninja1"); // active (met en current) la matrice liée au nom
+  gl4duBindMatrix("proj"); // active (met en current) la matrice liée au nom
   gl4duLoadIdentityf();
   // adaptation de l'écran au ratio
   gl4duFrustumf(-1 * ratio, 1 * ratio, -1, 1, 2, 100);
 }
 
-static void draw_object(int object_tex_id, int sky, int sun, GLuint object_id, float object_scale, float distance) {
+// suppr le 2 et 3 ème argument
+static void draw_object(int object_tex_id, GLuint object_id, float object_scale, float distance) {
 
   gl4duTranslatef(0, 0, -distance);
 
@@ -103,8 +109,6 @@ static void draw_object(int object_tex_id, int sky, int sun, GLuint object_id, f
   gl4duSendMatrices();
   glBindTexture(GL_TEXTURE_2D, _texId_systeme_solaire[object_tex_id]);
   glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-  glUniform1i(glGetUniformLocation(_pId, "sun"), sun);
-  glUniform1i(glGetUniformLocation(_pId, "sky"), sky);
 
   gl4dgDraw(object_id);
 
@@ -115,34 +119,39 @@ static void draw_object(int object_tex_id, int sky, int sun, GLuint object_id, f
 }
 static void scene(GLfloat a) {
   GLfloat  blanc[] = {1.0f, 1.0f, 1.0f, 1.0f};
-  gl4duBindMatrix("mod_ninja1"); // model, car on veut agir sur l\'objet
+  gl4duBindMatrix("mod"); // model, car on veut agir sur l\'objet
   gl4duLoadIdentityf();   // chargement de matrice identité dans la matrice en
                           // cours càd model
-  glUseProgram(_pId); // quel programme va être utilisé ? pId -> .vs fs
+  glUseProgram(_pId[0]); // quel programme va être utilisé ? pId -> .vs fs
 
-  glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1,
-               blanc); 
-  draw_object(0, 1, 0, _sphereId, 50.0f, 0);
+  /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
+  /*              blanc);  */
+  draw_object(0, _sphereId, 50.0f, 0);
 
   float ecart_deux_astre = 0.2f;
   float diviseur = 50.0f; // nécessaire, car je peux pas faire un ciel trop grand, donc je rapetisse les éléments
 
+  glUseProgram(_pId[1]); // quel programme va être utilisé ? pId -> .vs fs
   // dessin de la lune, 1 737,4 km de rayon équatorial
-  draw_object(1, 0, 0, _sphereId, 1.7374f/diviseur, 0);
+  draw_object(1, _sphereId, 1.7374f/diviseur, 0);
   float distance = 1.7374f/diviseur + ecart_deux_astre;
 
   // dessin terre, 6378 km : rayon équatorial
   distance += 6.378f / diviseur + ecart_deux_astre;
-  draw_object(2, 0, 0, _sphereId, (6.378f / diviseur), distance);
+  glUseProgram(_pId[2]); // quel programme va être utilisé ? pId -> .vs fs
+  draw_object(2, _sphereId, (6.378f / diviseur), distance);
 
+  glUseProgram(_pId[3]); // quel programme va être utilisé ? pId -> .vs fs
   // dessin saturne, rayon équatorial : 60268f km
   distance += 2 * (60.268f / diviseur) + ecart_deux_astre;
-  draw_object(3, 0, 0, _sphereId, 60.268f / diviseur, distance);
-  draw_object(4, 0, 0, _anneauId, 2*60.268f/diviseur, 0);
+  draw_object(3, _sphereId, 60.268f / diviseur, distance);
+  glUseProgram(_pId[4]); // quel programme va être utilisé ? pId -> .vs fs
+  draw_object(4, _anneauId, 2*60.268f/diviseur, 0);
 
   // dessin soleil,  696342 de rayon équatorial
   distance += 696.342f / diviseur + ecart_deux_astre;
-  draw_object(5, 0, 1, _sphereId, 696.342f / diviseur, distance);
+  glUseProgram(_pId[5]); // quel programme va être utilisé ? pId -> .vs fs
+  draw_object(5, _sphereId, 696.342f / diviseur, distance);
 
 
   glUseProgram(0);
@@ -173,7 +182,7 @@ void systeme_solaire_draw(void) {
       GL_DEPTH_BUFFER_BIT); // on clear le buffer de bouleur, et de profondeur
 
   glViewport(0, 0, _wW, _wH);
-  gl4duBindMatrix("view_ninja1");
+  gl4duBindMatrix("view");
   gl4duLoadIdentityf(); 
   gl4duLookAtf(-x, y, z, 0, 0, z, 0, 1.0f, 0); 
 

@@ -38,7 +38,7 @@ HEADERS = audioHelper.h animations.h
 SOURCES = audioHelper.c animations.c window.c terre.c saturne.c systeme_solaire.c credits.c
 OBJ = $(SOURCES:.c=.o)
 DOXYFILE = documentation/Doxyfile
-EXTRAFILES = COPYING terre.vs terre.fs shaders/basic.vs shaders/mix.fs shaders/basic.fs shader/saturne.vs shader/saturne.fs shader/systeme_solaire.fs shader/systeme_solaire.vs shader/credits.fs shader/credits.vs DejaVuSans-Bold.ttf
+EXTRAFILES = COPYING terre.vs terre.fs shaders/basic.vs shaders/mix.fs shaders/basic.fs shader/saturne.fs shader/systeme_solaire.fs shader/credits.fs shader/credits.vs DejaVuSans-Bold.ttf
 
 DISTFILES = $(SOURCES) Makefile $(HEADERS) $(DOXYFILE) $(EXTRAFILES)
 

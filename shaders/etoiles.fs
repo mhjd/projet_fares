@@ -7,8 +7,6 @@ uniform vec4 scolor;
 uniform vec4 lcolor;
 
 uniform sampler2D tex; 
-uniform int sky;
-uniform int sun;
 void main() {
     fragColor = texture(tex, texCoord) ;
 }
