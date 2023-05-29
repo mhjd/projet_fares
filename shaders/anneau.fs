@@ -564,7 +564,7 @@ void main(void) {
 
     float n, A = 1.0, mf = 1.0;
   
-    vec2 trait = vec2(tcoord[1],  tcoord[1]);
+    vec2 trait = vec2(tcoord[0],  tcoord[0]);
     for (int i = 0; i < 19; ++i){
       n += A * noise(trait * 3.5f * mf);
       A = A/2.0;

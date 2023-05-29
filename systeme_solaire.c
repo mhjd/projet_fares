@@ -117,41 +117,60 @@ static void draw_object(int object_tex_id, GLuint object_id, float object_scale,
   gl4duScalef(ancienne_taille, ancienne_taille,
               ancienne_taille); 
 }
+
+static void draw_with_perlin_noise(int object_tex_id, GLuint object_id, float object_scale, float distance) {
+
+  gl4duTranslatef(0, 0, -distance);
+
+  gl4duScalef(object_scale, object_scale,
+              object_scale);
+
+  gl4duSendMatrices();
+  glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+  useNoiseTextures(_pId[object_id], 0);
+  gl4dgDraw(object_id);
+  unuseNoiseTextures(0);
+
+  
+  float ancienne_taille = 1/object_scale;
+  gl4duScalef(ancienne_taille, ancienne_taille,
+              ancienne_taille); 
+}
 static void scene(GLfloat a) {
   GLfloat  blanc[] = {1.0f, 1.0f, 1.0f, 1.0f};
   gl4duBindMatrix("mod"); // model, car on veut agir sur l\'objet
   gl4duLoadIdentityf();   // chargement de matrice identité dans la matrice en
                           // cours càd model
   glUseProgram(_pId[0]); // quel programme va être utilisé ? pId -> .vs fs
-
   /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
   /*              blanc);  */
-  draw_object(0, _sphereId, 50.0f, 0);
+  draw_with_perlin_noise(0, _sphereId, 50.0f, 0);
 
   float ecart_deux_astre = 0.2f;
   float diviseur = 50.0f; // nécessaire, car je peux pas faire un ciel trop grand, donc je rapetisse les éléments
 
   glUseProgram(_pId[1]); // quel programme va être utilisé ? pId -> .vs fs
   // dessin de la lune, 1 737,4 km de rayon équatorial
-  draw_object(1, _sphereId, 1.7374f/diviseur, 0);
+  draw_with_perlin_noise(1, _sphereId, 1.7374f/diviseur, 0);
   float distance = 1.7374f/diviseur + ecart_deux_astre;
 
   // dessin terre, 6378 km : rayon équatorial
   distance += 6.378f / diviseur + ecart_deux_astre;
   glUseProgram(_pId[2]); // quel programme va être utilisé ? pId -> .vs fs
-  draw_object(2, _sphereId, (6.378f / diviseur), distance);
+  draw_with_perlin_noise(2, _sphereId, (6.378f / diviseur), distance);
 
-  glUseProgram(_pId[3]); // quel programme va être utilisé ? pId -> .vs fs
   // dessin saturne, rayon équatorial : 60268f km
+  glUseProgram(_pId[3]); // quel programme va être utilisé ? pId -> .vs fs
   distance += 2 * (60.268f / diviseur) + ecart_deux_astre;
-  draw_object(3, _sphereId, 60.268f / diviseur, distance);
+  draw_with_perlin_noise(3, _sphereId, 60.268f / diviseur, distance);
+
   glUseProgram(_pId[4]); // quel programme va être utilisé ? pId -> .vs fs
-  draw_object(4, _anneauId, 2*60.268f/diviseur, 0);
+  draw_with_perlin_noise(4, _anneauId, 2*60.268f/diviseur, 0);
+  distance += 696.342f / diviseur + ecart_deux_astre;
 
   // dessin soleil,  696342 de rayon équatorial
-  distance += 696.342f / diviseur + ecart_deux_astre;
   glUseProgram(_pId[5]); // quel programme va être utilisé ? pId -> .vs fs
-  draw_object(5, _sphereId, 696.342f / diviseur, distance);
+  draw_with_perlin_noise(5, _sphereId, 696.342f / diviseur, distance);
 
 
   glUseProgram(0);
