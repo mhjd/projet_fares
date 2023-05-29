@@ -49,13 +49,12 @@ static void resize(void) {
   gl4duFrustumf(-1 * ratio, 1 * ratio, -1, 1, 2, 100);
 }
 
-// supprimer le deuxième argument
-
 void draw_sphere_with_perlin(float object_scale, int pid) {
 
   gl4duRotatef(90, 0, 1, 0);
   gl4duScalef(object_scale, object_scale, object_scale);   // le diamètre de la lune est d'environ 1/3 de celui
   gl4duSendMatrices(); // envoie les matrices de translation et rotation
+
   useNoiseTextures(_pId[pid], 0);
   gl4dgDraw(_sphereId); 
   unuseNoiseTextures(0);
@@ -73,7 +72,7 @@ void draw_anneau_with_perlin() {
   gl4duScalef(object_scale, object_scale, object_scale);   // le diamètre de la lune est d'environ 1/3 de celui
   gl4duSendMatrices(); // envoie les matrices de translation et rotation
   useNoiseTextures(_pId[0], 0);
-  gl4dgDraw(_anneauId); // dessine le tore
+  gl4dgDraw(_anneauId); 
   unuseNoiseTextures(0);
 
   float ancienne_taille = 1 / object_scale;
@@ -90,8 +89,6 @@ void scene() {
                           // cours càd model
   glUseProgram(_pId[0]); // quel programme va être utilisé ? pId -> .vs fs
 
-  /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
-  /*              blanc); */
   // création du ciel étoilé
   draw_sphere_with_perlin(20.0f, 0);
 

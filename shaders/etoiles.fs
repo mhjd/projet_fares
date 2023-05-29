@@ -54,6 +54,7 @@ float rand(vec2 co){
 
 void main(void) {
   // calcul bizarre pour limiter le nombre d'étoiles
+  // normalement il devrait pas y avoir besoin de lumière car c'est les étoiles
   if (rand(tcoord) > 0.996 && rand(vec2(ild+tcoord[0], ild+tcoord[0])) > 0.9){
     fragColor = vec4(1.0, 1.0, 1.0, 1.0);
   } else {

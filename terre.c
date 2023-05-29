@@ -21,20 +21,6 @@ static GLuint _texId_terre[4] = {0};
 // 2 : texture lune
 // 3 : texture étoiles
 
-/*int main(int argc, char ** argv) {
-  if(!gl4duwCreateWindow(argc, argv, "Système solaire", GL4DW_POS_CENTERED,
-GL4DW_POS_CENTERED, _wW, _wH, GL4DW_OPENGL | GL4DW_RESIZABLE | GL4DW_SHOWN)) {
-    fprintf(stderr, "Erreur lors de la création de la fenêtre\n");
-    return 1;
-  }
-  init(); // initialisation
-  atexit(sortie); // libération de la mémoire
-  gl4duwResizeFunc(resize); // affecte la fonction appelée lors du resize.
-  gl4duwDisplayFunc(draw);  // affecte la fonction appelée lors de l'affichage.
-  gl4duwMainLoop(); // main loop
-  return 0;
-}*/
-
 void terre_init(void) {
 
   initNoiseTextures();
@@ -78,15 +64,8 @@ static void draw_with_perlin(int pid_number, float object_scale, float zoom) {
   gl4duScalef(object_scale, object_scale, object_scale);   // le diamètre de la lune est d'environ 1/3 de celui
   gl4duSendMatrices(); // envoie les matrices de translation et rotation
 
-  /* glBindTexture(GL_TEXTURE_2D, _texId_terre[pid_number]); */
-  /* glBindTexture(GL_TEXTURE_2D, _texId_terre[object_tex_id]); */
-  glUniform1i(glGetUniformLocation(_pId[pid_number], "tex"), 0);
-  glUniform1f(glGetUniformLocation(_pId[pid_number], "zoom"), zoom);
   useNoiseTextures(_pId[pid_number], 0);
-  /* glUniform1f(glGetUniformLocation(_pId, "zoom"), 2.5f); */
-  /* glUniform1i(glGetUniformLocation(_pId, "sky"), sky); */
-  /* glUniform1i(glGetUniformLocation(_pId, "sun"), sun); */
-  gl4dgDraw(_sphereId); // dessine le tore
+  gl4dgDraw(_sphereId);
   unuseNoiseTextures(0);
 
   float ancienne_taille = 1 / object_scale;
@@ -99,31 +78,24 @@ static void scene(GLfloat a) {
   GLfloat blanc[] = {1.0f, 1.0f, 1.0f, 1.0f};
   gl4duBindMatrix("mod"); // model, car on veut agir sur l\'objet
   gl4duLoadIdentityf();   // chargement de matrice identité dans la matrice en cours càd model
-  glUseProgram(_pId[0]);     // quel programme va être utilisé ? pId -> .vs .fs
-  /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
-  /*              blanc); // envoie couleur blanche en lumière aux shaders */
-  //création du ciel étoilé
+
+  // ciel étoilé
+  glUseProgram(_pId[0]);
   draw_with_perlin(0, 20.0f, 5.5f);
 
+  // soleil
   glUseProgram(_pId[1]);
-  /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
-  /*              blanc); // envoie couleur blanche en lumière aux shaders */
-  // création du soleil
   draw_with_perlin(1, 1.0, 35.5f);
 
+  // terre
   glUseProgram(_pId[2]);
-  /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
-  /*              blanc); // envoie couleur blanche en lumière aux shaders */
-  // création de la terre
   gl4duRotatef(a, 0, 1, 0);
   gl4duScalef(0.3f, 0.3f, 0.3f);
   gl4duTranslatef(10.0f, 0, 0);
   draw_with_perlin(2, 1, 7.5f);
-  /* draw_with_perlin() */
   glUseProgram(_pId[3]);
-  /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
-  /*              blanc); // envoie couleur blanche en lumière aux shaders */
-  // création de la lune
+
+  // lune
   gl4duScalef(0.3f, 0.3f, 0.3f);
   gl4duRotatef(a * 10, 0, 1, 0);
   gl4duRotatef(a, 1, 0, 0);
@@ -131,7 +103,6 @@ static void scene(GLfloat a) {
   draw_with_perlin(3, 1.0, 3.5);
 
   glUseProgram(0);
-  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
   void terre_draw(void) {
@@ -158,7 +129,6 @@ static void scene(GLfloat a) {
     gl4duBindMatrix("view");
     gl4duLoadIdentityf();
     gl4duLookAtf(5.6f, 0.0f, z, 0, 0, 0, 0, 1.0f, 0);
-    /* gl4duLookAtf(5.6f, 0.0f, 0.0f, 0, 0, 0, 0, 1.0f, 0); */
 
     // on dessine la scène, en fonction de l'angle
     scene(a);

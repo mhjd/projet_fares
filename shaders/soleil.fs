@@ -5,9 +5,6 @@ in vec3 mnormal;
 in vec2 tcoord;
 out vec4 fragColor;
 
-uniform float zoom;
-
-
 uniform sampler2D permTexture;
 uniform sampler2D gradTexture;
 

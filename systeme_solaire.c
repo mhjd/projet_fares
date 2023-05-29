@@ -28,9 +28,8 @@ void systeme_solaire_init(void) {
   glClearColor(0.0f, 1.0f, 0.0f, 1.0f); // couleur d'effacement
 
   // création des objets
-  _sphereId = gl4dgGenSpheref(20, 90);
+  _sphereId = gl4dgGenSpheref(90, 90);
   _anneauId = gl4dgGenTorusf(60, 2, 0.1f);
-  //_anneauId = gl4dgGenTorusf(60, 2, 0.1f);
   // pid shader
   _pId[0] = gl4duCreateProgram("<vs>shaders/terre.vs", "<fs>shaders/etoiles.fs", NULL);
   _pId[1] = gl4duCreateProgram("<vs>shaders/terre.vs", "<fs>shaders/lune.fs", NULL);
@@ -62,10 +61,7 @@ static void resize(void) {
   gl4duFrustumf(-1 * ratio, 1 * ratio, -1, 1, 2, 100);
 }
 
-// suppr le 2 et 3 ème argument
-
-
-static void draw_with_perlin_noise(int object_tex_id, GLuint object_id, float object_scale, float distance) {
+static void draw_with_perlin_noise(GLuint object_id, float object_scale, float distance) {
 
   gl4duTranslatef(0, 0, -distance);
 
@@ -73,7 +69,6 @@ static void draw_with_perlin_noise(int object_tex_id, GLuint object_id, float ob
               object_scale);
 
   gl4duSendMatrices();
-  glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
   useNoiseTextures(_pId[object_id], 0);
   gl4dgDraw(object_id);
   unuseNoiseTextures(0);
@@ -85,40 +80,38 @@ static void draw_with_perlin_noise(int object_tex_id, GLuint object_id, float ob
 }
 static void scene(GLfloat a) {
   GLfloat  blanc[] = {1.0f, 1.0f, 1.0f, 1.0f};
-  gl4duBindMatrix("mod"); // model, car on veut agir sur l\'objet
+  gl4duBindMatrix("mod"); // model, car on veut agir sur l'objet
   gl4duLoadIdentityf();   // chargement de matrice identité dans la matrice en
                           // cours càd model
-  glUseProgram(_pId[0]); // quel programme va être utilisé ? pId -> .vs fs
-  /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
-  /*              blanc);  */
-  draw_with_perlin_noise(0, _sphereId, 50.0f, 0);
+  // ciel
+  glUseProgram(_pId[0]); 
+  draw_with_perlin_noise(_sphereId, 50.0f, 0);
 
   float ecart_deux_astre = 0.2f;
   float diviseur = 50.0f; // nécessaire, car je peux pas faire un ciel trop grand, donc je rapetisse les éléments
 
-  glUseProgram(_pId[1]); // quel programme va être utilisé ? pId -> .vs fs
-  // dessin de la lune, 1 737,4 km de rayon équatorial
-  draw_with_perlin_noise(1, _sphereId, 1.7374f/diviseur, 0);
+  // lune, 1 737,4 km de rayon équatorial
+  glUseProgram(_pId[1]); 
+  draw_with_perlin_noise(_sphereId, 1.7374f/diviseur, 0);
   float distance = 1.7374f/diviseur + ecart_deux_astre;
 
-  // dessin terre, 6378 km : rayon équatorial
+  // terre, 6378 km : rayon équatorial
   distance += 6.378f / diviseur + ecart_deux_astre;
-  glUseProgram(_pId[2]); // quel programme va être utilisé ? pId -> .vs fs
-  draw_with_perlin_noise(2, _sphereId, (6.378f / diviseur), distance);
+  glUseProgram(_pId[2]);
+  draw_with_perlin_noise(_sphereId, (6.378f / diviseur), distance);
 
-  // dessin saturne, rayon équatorial : 60268f km
-  glUseProgram(_pId[3]); // quel programme va être utilisé ? pId -> .vs fs
+  // saturne, rayon équatorial : 60268f km
+  glUseProgram(_pId[3]);
   distance += 2 * (60.268f / diviseur) + ecart_deux_astre;
-  draw_with_perlin_noise(3, _sphereId, 60.268f / diviseur, distance);
-
-  glUseProgram(_pId[4]); // quel programme va être utilisé ? pId -> .vs fs
-  draw_with_perlin_noise(4, _anneauId, 2*60.268f/diviseur, 0);
+  draw_with_perlin_noise(_sphereId, 60.268f / diviseur, distance);
+  // anneau
+  glUseProgram(_pId[4]);
+  draw_with_perlin_noise(_anneauId, 2*60.268f/diviseur, 0);
   distance += 696.342f / diviseur + ecart_deux_astre;
 
   // dessin soleil,  696342 de rayon équatorial
-  glUseProgram(_pId[5]); // quel programme va être utilisé ? pId -> .vs fs
-  draw_with_perlin_noise(5, _sphereId, 696.342f / diviseur, distance);
-
+  glUseProgram(_pId[5]);
+  draw_with_perlin_noise(_sphereId, 696.342f / diviseur, distance);
 
   glUseProgram(0);
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -137,9 +130,7 @@ void systeme_solaire_draw(void) {
   double t = gl4dGetElapsedTime() / 1000.0, dt = t - t0;
   t0 = t;
   total_time += t0;
-  //  static GLfloat a = 0.0f, x = -0.01f, y = 3.0f, z = -1.0;
   static GLfloat a = 0.0f, x = 1.01f, y = 1.0f, z = +0.5;
-  // GLfloat a = 0.0f, x = 1.01f, y = 1.0f, z = +0.5;
   glEnable(GL_DEPTH_TEST);
   resize();
 

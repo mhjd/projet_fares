@@ -12,6 +12,8 @@ TAR = tar
 MKDIR = mkdir
 CHMOD = chmod
 CP = rsync -R
+STRIP = strip
+
 # déclaration des options du compilateur
 PG_FLAGS =
 SDL_CFLAGS = $(shell sdl2-config --cflags)
@@ -46,6 +48,7 @@ all: $(PROGNAME)
 
 $(PROGNAME): $(OBJ)
 	$(CC) $(OBJ) $(LDFLAGS) -o $(PROGNAME)
+	$(STRIP) $(PROGNAME)
 
 %.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
