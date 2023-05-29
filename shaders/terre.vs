@@ -23,8 +23,6 @@ void main() {
      N = normalize(N);
      vec3 Ld = normalize(Ld0);
      ild = clamp(dot(N, -Ld), 0.0, 1.0);
-
-     //
      gl_Position = proj* mvpos;
      tcoord = tC;
 }

@@ -16,34 +16,6 @@ static GLuint _anneauId = 0;
 static GLuint _pId[3] = {0};
 static GLuint _texId_saturne[4] = {0};
 
-void charge_texture() {
-
-  // ma texture :
-  // mes fichiers images de texture
-  static char *images[] = {"img/2k_saturn_ring_alpha_transparence.png",
-                           "img/8k_stars_milky_way.jpg",
-                           "img/8k_saturn.jpg"};
-
-  SDL_Surface *t;
-  glGenTextures(4, _texId_saturne);
-  for (int i = 0; i < 3; i++) {
-    glBindTexture(GL_TEXTURE_2D, _texId_saturne[i]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    if ((t = IMG_Load(images[i])) != NULL) {
-      int mode = t->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;
-
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t->w, t->h, 0, mode,
-                   GL_UNSIGNED_BYTE, t->pixels);
-      SDL_FreeSurface(t);
-    } else {
-      fprintf(stderr, "can't open file  : %s\n", SDL_GetError());
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA,
-                   GL_UNSIGNED_BYTE, NULL);
-    }
-  }
-}
 void saturne_init(void) {
   initNoiseTextures();
   glClearColor(0.0f, 1.0f, 0.0f, 1.0f); // couleur d'effacement
@@ -62,8 +34,6 @@ void saturne_init(void) {
   gl4duGenMatrix(GL_FLOAT, "proj");
   gl4duGenMatrix(GL_FLOAT, "mod");
   gl4duGenMatrix(GL_FLOAT, "view");
-  charge_texture();
-  //resize(_wW, _wH);
 }
 
 static void resize(void) {
@@ -80,17 +50,6 @@ static void resize(void) {
 }
 
 // supprimer le deuxième argument
-void draw_object(int object_tex_id, GLuint object_id,
-                 float object_scale) {
-
-  gl4duScalef( object_scale,  object_scale,
-               object_scale); 
-
-  gl4duSendMatrices(); // envoie les matrices de translation et rotation
-  glBindTexture(GL_TEXTURE_2D, _texId_saturne[object_tex_id]);
-  gl4dgDraw(object_id);
-  gl4duScalef(1 / object_scale, 1 / object_scale, 1 / object_scale);
-}
 
 void draw_sphere_with_perlin(float object_scale, int pid) {
 
@@ -134,17 +93,14 @@ void scene() {
   /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
   /*              blanc); */
   // création du ciel étoilé
-  /* draw_object(1, _sphereId, 20.0f); */
   draw_sphere_with_perlin(20.0f, 0);
 
   glUseProgram(_pId[1]); // quel programme va être utilisé ? pId -> .vs fs
   // création de saturne
-  /* draw_object(2, _sphereId, 1.0f); */
   draw_sphere_with_perlin(1.0f, 1);
 
   glUseProgram(_pId[2]); // quel programme va être utilisé ? pId -> .vs fs
   // création de l'anneeau de saturne
-  /* draw_object(0, _anneauId, 2.5f); */
   draw_anneau_with_perlin();
 
 

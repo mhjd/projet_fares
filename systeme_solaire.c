@@ -21,41 +21,6 @@ static GLuint _texId_systeme_solaire[6] = {0};
 
 
 
-static void charge_texture(void) {
-
-  int nb_textures = 6;
-  // ma texture :
-  // mes fichiers images de texture
-  static char *images[] = {
-      "img/8k_stars_milky_way.jpg",
-      "img/lune.jpg",
-      "img/terre.jpg",
-      "img/8k_saturn.jpg",
-      "img/2k_saturn_ring_alpha_transparence.png",
-      "img/soleil.jpg"
-  };
-
-  SDL_Surface *t;
-  glGenTextures(nb_textures, _texId_systeme_solaire);
-  for (int i = 0; i < nb_textures; i++){
-    glBindTexture(GL_TEXTURE_2D, _texId_systeme_solaire[i]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-
-    if ((t = IMG_Load(images[i])) != NULL) {
-      int mode = t->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;
-
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t->w, t->h, 0, mode,
-                  GL_UNSIGNED_BYTE, t->pixels);
-      SDL_FreeSurface(t);
-    } else {
-      fprintf(stderr, "can't open file  : %s\n",  SDL_GetError());
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    }
-  }
-
-}
 
 void systeme_solaire_init(void) {
 
@@ -81,7 +46,6 @@ void systeme_solaire_init(void) {
   gl4duGenMatrix(GL_FLOAT, "mod");
   gl4duGenMatrix(GL_FLOAT, "view");
 
-  charge_texture();
   //resize(_wW, _wH);
 }
 
@@ -99,24 +63,7 @@ static void resize(void) {
 }
 
 // suppr le 2 et 3 ème argument
-static void draw_object(int object_tex_id, GLuint object_id, float object_scale, float distance) {
 
-  gl4duTranslatef(0, 0, -distance);
-
-  gl4duScalef(object_scale, object_scale,
-              object_scale);
-
-  gl4duSendMatrices();
-  glBindTexture(GL_TEXTURE_2D, _texId_systeme_solaire[object_tex_id]);
-  glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-
-  gl4dgDraw(object_id);
-
-  
-  float ancienne_taille = 1/object_scale;
-  gl4duScalef(ancienne_taille, ancienne_taille,
-              ancienne_taille); 
-}
 
 static void draw_with_perlin_noise(int object_tex_id, GLuint object_id, float object_scale, float distance) {
 

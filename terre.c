@@ -35,47 +35,6 @@ GL4DW_POS_CENTERED, _wW, _wH, GL4DW_OPENGL | GL4DW_RESIZABLE | GL4DW_SHOWN)) {
   return 0;
 }*/
 
-static void charge_texture(void){
-  // partie texture :
-  // mes fichiers images de texture
-  static char *images[] = {"img/terre.jpg", "img/lune.jpg",
-                           "img/8k_stars_milky_way.jpg", "img/soleil.jpg"};
-
-  // ce qui suit est inspirer d'un fichier sample que j'avais trouvé, vu que je savais pas comment faire pour coller une texture à un objet
-  // je précise également que je me suis beaucoup aider des vidéos moodle donc il y a sûrement des parties ressemblante
-  SDL_Surface *t;
-  // on va généré 4 textures
-  glGenTextures(4, _texId_terre);
-  for (int i = 0; i < 4; i++){
-
-    // on bind la texture actuelle
-    glBindTexture(GL_TEXTURE_2D, _texId_terre[i]);
-    // paramètres de texture
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // on essaye de load l'image
-    if ((t = IMG_Load(images[i])) != NULL) {
-      // si c'est en rgb ou rgba
-      int mode = t->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;
-
-      /* // on relie l'image au texid */
-      /* if (i == 0){ */
-      /*   GLfloat color[4] = { 1.0f, 0.0f, 0.0f, 1.0f };   */
-      /*   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, mode, */
-      /*                GL_UNSIGNED_BYTE, color); */
-        
-      /* } else { */
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t->w, t->h, 0, mode,
-                  GL_UNSIGNED_BYTE, t->pixels);
-      /* } */
-      // on libère la mémoire de t
-      SDL_FreeSurface(t);
-    } else {
-      fprintf(stderr, "on ne peut pas ouvrir le fichier : %s\n",  SDL_GetError());
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    }
-  }
-}
 void terre_init(void) {
 
   initNoiseTextures();
@@ -96,7 +55,6 @@ void terre_init(void) {
   gl4duGenMatrix(GL_FLOAT, "mod");
   gl4duGenMatrix(GL_FLOAT, "view");
   gl4duGenMatrix(GL_FLOAT, "proj");
-  charge_texture();
   //resize(_wW, _wH); // on resize car sinon faut bouger la fenêtre pour que l'écran apparaisse
 }
 
@@ -113,38 +71,6 @@ static void resize(void) {
   gl4duFrustumf(-1 * ratio, 1 * ratio, -1 , 1 , 2, 100);  
 }
 
-
-
-static void draw_object(int object_tex_id, float object_scale ) {
-
-  gl4duScalef( object_scale, object_scale, object_scale);   // le diamètre de la lune est d'environ 1/3 de celui
-  gl4duSendMatrices(); // envoie les matrices de translation et rotation
-  glBindTexture(GL_TEXTURE_2D, _texId_terre[object_tex_id]);
-  glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-  gl4dgDraw(_sphereId); // dessine le tore
-
-  float ancienne_taille = 1 / object_scale;
-  gl4duScalef(ancienne_taille, ancienne_taille,
-              ancienne_taille);
-}
-static void draw_earth(){
-  gl4duScalef(1, 1, 1);   // le diamètre de la lune est d'environ 1/3 de celui
-  gl4duSendMatrices(); // envoie les matrices de translation et rotation
-  /* glBindTexture(GL_TEXTURE_2D, _texId_terre[object_tex_id]); */
-  glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-  glUniform1f(glGetUniformLocation(_pId, "zoom"), 7.5f);
-  useNoiseTextures(_pId[0], 0);
-  /* glUniform1f(glGetUniformLocation(_pId, "zoom"), 2.5f); */
-  /* glUniform1i(glGetUniformLocation(_pId, "sky"), sky); */
-  /* glUniform1i(glGetUniformLocation(_pId, "sun"), sun); */
-  gl4dgDraw(_sphereId); // dessine le tore
-  unuseNoiseTextures(0);
-
-  float ancienne_taille = 1 / 1;
-  gl4duScalef(ancienne_taille, ancienne_taille,
-              ancienne_taille);
-  
-}
 
 static void draw_with_perlin(int pid_number, float object_scale, float zoom) {
 
@@ -177,7 +103,6 @@ static void scene(GLfloat a) {
   /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
   /*              blanc); // envoie couleur blanche en lumière aux shaders */
   //création du ciel étoilé
-  /* draw_object(0, 20.0f); */
   draw_with_perlin(0, 20.0f, 5.5f);
 
   glUseProgram(_pId[1]);
@@ -185,7 +110,6 @@ static void scene(GLfloat a) {
   /*              blanc); // envoie couleur blanche en lumière aux shaders */
   // création du soleil
   draw_with_perlin(1, 1.0, 35.5f);
-  /* draw_object(3, 1.0f); */
 
   glUseProgram(_pId[2]);
   /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
@@ -194,7 +118,6 @@ static void scene(GLfloat a) {
   gl4duRotatef(a, 0, 1, 0);
   gl4duScalef(0.3f, 0.3f, 0.3f);
   gl4duTranslatef(10.0f, 0, 0);
-  /* draw_object(0, 0, 0, 1); */
   draw_with_perlin(2, 1, 7.5f);
   /* draw_with_perlin() */
   glUseProgram(_pId[3]);
@@ -206,7 +129,6 @@ static void scene(GLfloat a) {
   gl4duRotatef(a, 1, 0, 0);
   gl4duTranslatef(5.0f, 0, 0);
   draw_with_perlin(3, 1.0, 3.5);
-  /* draw_object(1,  1); */
 
   glUseProgram(0);
   glBindTexture(GL_TEXTURE_2D, 0);
