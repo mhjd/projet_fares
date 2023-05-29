@@ -45,6 +45,7 @@ void charge_texture() {
   }
 }
 void saturne_init(void) {
+  initNoiseTextures();
   glClearColor(0.0f, 1.0f, 0.0f, 1.0f); // couleur d'effacement
 
   // création des objets
@@ -91,6 +92,38 @@ void draw_object(int object_tex_id, GLuint object_id,
   gl4duScalef(1 / object_scale, 1 / object_scale, 1 / object_scale);
 }
 
+void draw_sphere_with_perlin(float object_scale, int pid) {
+
+  gl4duRotatef(90, 0, 1, 0);
+  gl4duScalef(object_scale, object_scale, object_scale);   // le diamètre de la lune est d'environ 1/3 de celui
+  gl4duSendMatrices(); // envoie les matrices de translation et rotation
+  useNoiseTextures(_pId[pid], 0);
+  gl4dgDraw(_sphereId); 
+  unuseNoiseTextures(0);
+
+  float ancienne_taille = 1 / object_scale;
+  gl4duScalef(ancienne_taille, ancienne_taille,
+              ancienne_taille);
+  
+  gl4duRotatef(-90, 0, 1, 0);
+}
+void draw_anneau_with_perlin() {
+  int pid_number = 2;
+  gl4duRotatef(90, 0, 1, 0);
+  float object_scale = 2.5f;
+  gl4duScalef(object_scale, object_scale, object_scale);   // le diamètre de la lune est d'environ 1/3 de celui
+  gl4duSendMatrices(); // envoie les matrices de translation et rotation
+  useNoiseTextures(_pId[0], 0);
+  gl4dgDraw(_anneauId); // dessine le tore
+  unuseNoiseTextures(0);
+
+  float ancienne_taille = 1 / object_scale;
+  gl4duScalef(ancienne_taille, ancienne_taille,
+              ancienne_taille);
+  
+  gl4duRotatef(-90, 0, 1, 0);
+}
+
 void scene() {
   GLfloat blanc[] = {1.0f, 1.0f, 1.0f, 1.0f};
   gl4duBindMatrix("mod"); // model, car on veut agir sur l\'objet
@@ -101,15 +134,18 @@ void scene() {
   /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
   /*              blanc); */
   // création du ciel étoilé
-  draw_object(1, _sphereId, 20.0f);
+  /* draw_object(1, _sphereId, 20.0f); */
+  draw_sphere_with_perlin(20.0f, 0);
 
   glUseProgram(_pId[1]); // quel programme va être utilisé ? pId -> .vs fs
   // création de saturne
-  draw_object(2, _sphereId, 1.0f);
+  /* draw_object(2, _sphereId, 1.0f); */
+  draw_sphere_with_perlin(1.0f, 1);
 
   glUseProgram(_pId[2]); // quel programme va être utilisé ? pId -> .vs fs
   // création de l'anneeau de saturne
-  draw_object(0, _anneauId, 2.5f);
+  /* draw_object(0, _anneauId, 2.5f); */
+  draw_anneau_with_perlin();
 
 
   glUseProgram(0);

@@ -2,7 +2,7 @@
 
 in vec4 mpos;
 in vec3 mnormal;
-in vec2 texCoord;
+in vec2 tcoord;
 in float ild;
 out vec4 fragColor;
 
@@ -563,7 +563,7 @@ void main(void) {
   
   for (int i = 0; i < 5; ++i){
     // on inverse, ça fait plus effet terre je trouve quand c'est vertical
-    n += A * noise(vec2(texCoord[1], texCoord[0]) * 7.5f * mf);
+    n += A * noise(vec2(tcoord[1], tcoord[0]) * 7.5f * mf);
     A = A/2.0;
     mf = mf * 2.0;
   }
@@ -571,10 +571,10 @@ void main(void) {
   vec4 mycolor = vec4(n);
   if (mycolor[0] > 0.001){
     // le *vec4(-1) permet d'inversé le côté clair
-    fragColor = vec4(0.2, 0.4, 0.0, 0.0) + mycolor*ild;//*vec4(-1);
+    fragColor = vec4(0.1, 0.2, 0.0, 0.0) + mycolor*ild;//*vec4(-1);
   } else {
     // le *vec4(-1) permet d'inversé le côté sombre
-    fragColor = vec4(0.0, 0.0, 1.0, 1.0)+ mycolor*ild;//*vec4(-1);
+    fragColor = vec4(0.0, 0.0, 0.5, 1.0)+ mycolor*ild;//*vec4(-1);
     
   }
 }

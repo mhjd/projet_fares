@@ -9,7 +9,7 @@ uniform mat4 mod;
 uniform mat4 view;
 
 out float ild;
-out vec2 texCoord; 
+out vec2 tcoord; 
 const vec3 Ld0 = vec3(2, -1, -1); // origine de la lumière
 
 void main() {
@@ -26,5 +26,5 @@ void main() {
 
      //
      gl_Position = proj* mvpos;
-     texCoord = tC;
+     tcoord = tC;
 }

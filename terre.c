@@ -115,16 +115,12 @@ static void resize(void) {
 
 
 
-static void draw_object(int object_tex_id, int sky, int sun, float object_scale ) {
+static void draw_object(int object_tex_id, float object_scale ) {
 
-  gl4duScalef(
-      object_scale, object_scale,
-      object_scale);   // le diamètre de la lune est d'environ 1/3 de celui
+  gl4duScalef( object_scale, object_scale, object_scale);   // le diamètre de la lune est d'environ 1/3 de celui
   gl4duSendMatrices(); // envoie les matrices de translation et rotation
   glBindTexture(GL_TEXTURE_2D, _texId_terre[object_tex_id]);
   glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-  glUniform1i(glGetUniformLocation(_pId, "sky"), sky);
-  glUniform1i(glGetUniformLocation(_pId, "sun"), sun);
   gl4dgDraw(_sphereId); // dessine le tore
 
   float ancienne_taille = 1 / object_scale;
@@ -149,6 +145,30 @@ static void draw_earth(){
               ancienne_taille);
   
 }
+
+static void draw_with_perlin(int pid_number, float object_scale, float zoom) {
+
+  gl4duRotatef(90, 0, 1, 0);
+  gl4duScalef(object_scale, object_scale, object_scale);   // le diamètre de la lune est d'environ 1/3 de celui
+  gl4duSendMatrices(); // envoie les matrices de translation et rotation
+
+  /* glBindTexture(GL_TEXTURE_2D, _texId_terre[pid_number]); */
+  /* glBindTexture(GL_TEXTURE_2D, _texId_terre[object_tex_id]); */
+  glUniform1i(glGetUniformLocation(_pId[pid_number], "tex"), 0);
+  glUniform1f(glGetUniformLocation(_pId[pid_number], "zoom"), zoom);
+  useNoiseTextures(_pId[pid_number], 0);
+  /* glUniform1f(glGetUniformLocation(_pId, "zoom"), 2.5f); */
+  /* glUniform1i(glGetUniformLocation(_pId, "sky"), sky); */
+  /* glUniform1i(glGetUniformLocation(_pId, "sun"), sun); */
+  gl4dgDraw(_sphereId); // dessine le tore
+  unuseNoiseTextures(0);
+
+  float ancienne_taille = 1 / object_scale;
+  gl4duScalef(ancienne_taille, ancienne_taille,
+              ancienne_taille);
+  
+  gl4duRotatef(-90, 0, 1, 0);
+}
 static void scene(GLfloat a) {
   GLfloat blanc[] = {1.0f, 1.0f, 1.0f, 1.0f};
   gl4duBindMatrix("mod"); // model, car on veut agir sur l\'objet
@@ -157,13 +177,15 @@ static void scene(GLfloat a) {
   /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
   /*              blanc); // envoie couleur blanche en lumière aux shaders */
   //création du ciel étoilé
-  draw_object(2, 1, 0, 20.0f);
+  /* draw_object(0, 20.0f); */
+  draw_with_perlin(0, 20.0f, 5.5f);
 
   glUseProgram(_pId[1]);
   /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
   /*              blanc); // envoie couleur blanche en lumière aux shaders */
   // création du soleil
-  draw_object(3, 0, 1, 1.0f);
+  draw_with_perlin(1, 1.0, 35.5f);
+  /* draw_object(3, 1.0f); */
 
   glUseProgram(_pId[2]);
   /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
@@ -172,10 +194,9 @@ static void scene(GLfloat a) {
   gl4duRotatef(a, 0, 1, 0);
   gl4duScalef(0.3f, 0.3f, 0.3f);
   gl4duTranslatef(10.0f, 0, 0);
-  gl4duRotatef(90, 0, 1, 0);
   /* draw_object(0, 0, 0, 1); */
-  draw_earth();
-  gl4duRotatef(-90, 0, 1, 0);
+  draw_with_perlin(2, 1, 7.5f);
+  /* draw_with_perlin() */
   glUseProgram(_pId[3]);
   /* glUniform4fv(glGetUniformLocation(_pId, "lcolor"), 1, */
   /*              blanc); // envoie couleur blanche en lumière aux shaders */
@@ -184,7 +205,8 @@ static void scene(GLfloat a) {
   gl4duRotatef(a * 10, 0, 1, 0);
   gl4duRotatef(a, 1, 0, 0);
   gl4duTranslatef(5.0f, 0, 0);
-  draw_object(1, 0, 0, 1);
+  draw_with_perlin(3, 1.0, 3.5);
+  /* draw_object(1,  1); */
 
   glUseProgram(0);
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -214,6 +236,7 @@ static void scene(GLfloat a) {
     gl4duBindMatrix("view");
     gl4duLoadIdentityf();
     gl4duLookAtf(5.6f, 0.0f, z, 0, 0, 0, 0, 1.0f, 0);
+    /* gl4duLookAtf(5.6f, 0.0f, 0.0f, 0, 0, 0, 0, 1.0f, 0); */
 
     // on dessine la scène, en fonction de l'angle
     scene(a);
